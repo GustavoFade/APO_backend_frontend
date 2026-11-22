@@ -1,3 +1,6 @@
+import { Mensagens } from './constants/mensagens.js';
+import { TAMANHO_CAMPO_MINIMO } from './constants/domain.js';
+
 const seletores = {
   form: '#form-cliente',
   id: '#cliente-id',
@@ -26,10 +29,10 @@ export function criarFormulario({ aoEnviar, aoCancelar }) {
   }
 
   function validarCliente({ nome, email }) {
-    const nomeOk = nome.trim().length > 0;
-    const emailOk = email.trim().length > 0;
+    const nomeOk = nome.trim().length > TAMANHO_CAMPO_MINIMO;
+    const emailOk = email.trim().length > TAMANHO_CAMPO_MINIMO;
     if (!nomeOk || !emailOk) {
-      return 'Nome e e-mail são obrigatórios.';
+      return Mensagens.CAMPOS_OBRIGATORIOS;
     }
     return null;
   }

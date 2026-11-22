@@ -1,3 +1,6 @@
+import { HttpStatus } from './constants/httpStatus.js';
+import { Mensagens } from './constants/mensagens.js';
+
 const BASE_URL = '';
 
 async function lerCorpo(response) {
@@ -22,11 +25,11 @@ async function tratarResposta(response) {
   const dados = await lerCorpo(response);
 
   if (!response.ok) {
-    const mensagem = dados?.erro || 'Erro na comunicação com a API.';
+    const mensagem = dados?.erro || Mensagens.ERRO_COMUNICACAO_API;
     throw criarErro(mensagem, response.status);
   }
 
-  if (response.status === 204) {
+  if (response.status === HttpStatus.NO_CONTENT) {
     return null;
   }
 

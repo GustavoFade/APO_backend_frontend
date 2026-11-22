@@ -1,26 +1,42 @@
 import { clienteDataSource } from './api.js';
 import { criarFormulario } from './formulario.js';
 import { criarListagemClientes } from './clientes.js';
+import { HttpStatus } from './constants/httpStatus.js';
+import { ErroRede, Mensagens } from './constants/mensagens.js';
+import { ClasseMensagens, TipoMensagem } from './constants/ui.js';
 
 const areaMensagens = document.getElementById('mensagens');
 const areaLista = document.getElementById('area-lista');
 const indicadorCarregamento = document.getElementById('lista-carregando');
 
 function mensagemErroComunicacao(erro) {
-  if (erro.name === 'TypeError' || erro.message === 'Failed to fetch') {
-    return 'Falha de comunicação com o servidor. Verifique se a API está em execução.';
+  if (
+    erro.name === ErroRede.NOME_TYPE_ERROR
+    || erro.message === ErroRede.MENSAGEM_FAILED_FETCH
+  ) {
+    return Mensagens.FALHA_COMUNICACAO;
   }
-  return erro.message || 'Ocorreu um erro inesperado.';
+  return erro.message || Mensagens.ERRO_INESPERADO;
 }
 
-function exibirMensagem(texto, tipo = 'info') {
+function exibirMensagem(texto, tipo = TipoMensagem.INFO) {
   areaMensagens.textContent = texto;
-  areaMensagens.className = `mensagens mensagens--${tipo}`;
+  areaMensagens.className = ClasseMensagens.prefixo(tipo);
 }
 
 function limparMensagem() {
   areaMensagens.textContent = '';
-  areaMensagens.className = 'mensagens';
+  areaMensagens.className = ClasseMensagens.BASE;
+}
+
+function mensagemParaErroApi(erro) {
+  if (erro.status === HttpStatus.NOT_FOUND) {
+    return Mensagens.CLIENTE_NAO_ENCONTRADO_LISTA;
+  }
+  if (erro.status === HttpStatus.BAD_REQUEST) {
+    return erro.message;
+  }
+  return mensagemErroComunicacao(erro);
 }
 
 async function carregarClientes(listagem) {
@@ -29,7 +45,7 @@ async function carregarClientes(listagem) {
     const clientes = await clienteDataSource.listar();
     listagem.renderizar(clientes);
   } catch (erro) {
-    exibirMensagem(mensagemErroComunicacao(erro), 'erro');
+    exibirMensagem(mensagemErroComunicacao(erro), TipoMensagem.ERRO);
   } finally {
     indicadorCarregamento.hidden = true;
   }
@@ -40,26 +56,20 @@ const listagem = criarListagemClientes({
   aoEditar(cliente) {
     limparMensagem();
     formulario.preencherParaEdicao(cliente);
-    exibirMensagem(`Editando: ${cliente.nome}`, 'info');
+    exibirMensagem(Mensagens.EDITANDO(cliente.nome), TipoMensagem.INFO);
   },
   async aoExcluir(cliente) {
-    const confirmar = window.confirm(
-      `Deseja excluir o cliente "${cliente.nome}"?`,
-    );
+    const confirmar = window.confirm(Mensagens.CONFIRMAR_EXCLUSAO(cliente.nome));
     if (!confirmar) {
       return;
     }
 
     try {
       await clienteDataSource.excluir(cliente.id);
-      exibirMensagem('Cliente excluído com sucesso.', 'sucesso');
+      exibirMensagem(Mensagens.CLIENTE_EXCLUIDO, TipoMensagem.SUCESSO);
       await carregarClientes(listagem);
     } catch (erro) {
-      const texto =
-        erro.status === 404
-          ? 'Cliente não encontrado. A lista será atualizada.'
-          : mensagemErroComunicacao(erro);
-      exibirMensagem(texto, 'erro');
+      exibirMensagem(mensagemParaErroApi(erro), TipoMensagem.ERRO);
       await carregarClientes(listagem);
     }
   },
@@ -69,7 +79,7 @@ const formulario = criarFormulario({
   aoCancelar: limparMensagem,
   async aoEnviar(evento) {
     if (evento.tipo === 'validacao') {
-      exibirMensagem(evento.mensagem, 'erro');
+      exibirMensagem(evento.mensagem, TipoMensagem.ERRO);
       return;
     }
 
@@ -79,22 +89,16 @@ const formulario = criarFormulario({
     try {
       if (evento.id) {
         await clienteDataSource.atualizar(evento.id, evento.dados);
-        exibirMensagem('Cliente atualizado com sucesso.', 'sucesso');
+        exibirMensagem(Mensagens.CLIENTE_ATUALIZADO, TipoMensagem.SUCESSO);
       } else {
         await clienteDataSource.criar(evento.dados);
-        exibirMensagem('Cliente cadastrado com sucesso.', 'sucesso');
+        exibirMensagem(Mensagens.CLIENTE_CADASTRADO, TipoMensagem.SUCESSO);
       }
       formulario.limpar();
       await carregarClientes(listagem);
     } catch (erro) {
-      const texto =
-        erro.status === 404
-          ? 'Cliente não encontrado. A lista será atualizada.'
-          : erro.status === 400
-            ? erro.message
-            : mensagemErroComunicacao(erro);
-      exibirMensagem(texto, 'erro');
-      if (erro.status === 404) {
+      exibirMensagem(mensagemParaErroApi(erro), TipoMensagem.ERRO);
+      if (erro.status === HttpStatus.NOT_FOUND) {
         formulario.limpar();
         await carregarClientes(listagem);
       }

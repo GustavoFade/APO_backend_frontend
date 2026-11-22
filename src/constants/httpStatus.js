@@ -1,0 +1,14 @@
+/**
+ * Express não exporta códigos HTTP numéricos; o módulo `http` do Node só mapeia
+ * número → frase. Constantes locais evitam números mágicos e mantêm o projeto sem deps extras.
+ */
+const HttpStatus = Object.freeze({
+  OK: 200,
+  CREATED: 201,
+  NO_CONTENT: 204,
+  BAD_REQUEST: 400,
+  NOT_FOUND: 404,
+  INTERNAL_SERVER_ERROR: 500,
+});
+
+module.exports = HttpStatus;

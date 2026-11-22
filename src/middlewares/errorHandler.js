@@ -1,17 +1,14 @@
-const AppError = require('../errors/AppError');
+const HttpStatus = require('../constants/httpStatus');
+const resolverRespostaHttp = require('../http/resolverRespostaHttp');
 
 function errorHandler(err, req, res, next) {
   if (res.headersSent) {
     return next(err);
   }
 
-  const statusCode = err instanceof AppError ? err.statusCode : 500;
-  const mensagem =
-    err instanceof AppError
-      ? err.message
-      : 'Erro interno do servidor.';
+  const { statusCode, mensagem } = resolverRespostaHttp(err);
 
-  if (statusCode >= 500) {
+  if (statusCode >= HttpStatus.INTERNAL_SERVER_ERROR) {
     console.error(err);
   }
 

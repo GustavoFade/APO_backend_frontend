@@ -1,14 +1,12 @@
-const AppError = require('../errors/AppError');
-const { normalizarTexto } = require('../domain/cliente');
+const { normalizarTexto, campoPreenchido } = require('../domain/cliente');
+const CamposObrigatoriosClienteError = require('../errors/domain/CamposObrigatoriosClienteError');
 
 function validateClienteBody(req, res, next) {
   const nome = normalizarTexto(req.body?.nome);
   const email = normalizarTexto(req.body?.email);
 
-  if (!nome || !email) {
-    return next(
-      new AppError('Nome e e-mail são obrigatórios.', 400),
-    );
+  if (!campoPreenchido(nome) || !campoPreenchido(email)) {
+    return next(new CamposObrigatoriosClienteError());
   }
 
   req.body = {

@@ -8,6 +8,9 @@ function criarContainer() {
   const clienteController = new ClienteController(clienteService);
 
   return {
+    controllers: {
+      cliente: clienteController,
+    },
     clienteRepository,
     clienteService,
     clienteController,

@@ -1,4 +1,4 @@
-const AppError = require('../errors/AppError');
+const ClienteNaoEncontradoError = require('../errors/domain/ClienteNaoEncontradoError');
 const {
   montarCliente,
   validarCamposObrigatorios,
@@ -16,28 +16,22 @@ class ClienteService {
   buscarPorId(id) {
     const cliente = this.clienteRepository.buscarPorId(id);
     if (!cliente) {
-      throw new AppError('Cliente não encontrado.', 404);
+      throw new ClienteNaoEncontradoError();
     }
     return cliente;
   }
 
   criar(dados) {
-    const mensagem = validarCamposObrigatorios(dados);
-    if (mensagem) {
-      throw new AppError(mensagem, 400);
-    }
+    validarCamposObrigatorios(dados);
     const cliente = montarCliente(dados);
     return this.clienteRepository.salvar(cliente);
   }
 
   atualizar(id, dados) {
-    const mensagem = validarCamposObrigatorios(dados);
-    if (mensagem) {
-      throw new AppError(mensagem, 400);
-    }
+    validarCamposObrigatorios(dados);
     const existente = this.clienteRepository.buscarPorId(id);
     if (!existente) {
-      throw new AppError('Cliente não encontrado.', 404);
+      throw new ClienteNaoEncontradoError();
     }
     const cliente = montarCliente(dados, Number(id));
     return this.clienteRepository.atualizar(id, cliente);
@@ -46,7 +40,7 @@ class ClienteService {
   excluir(id) {
     const removido = this.clienteRepository.remover(id);
     if (!removido) {
-      throw new AppError('Cliente não encontrado.', 404);
+      throw new ClienteNaoEncontradoError();
     }
   }
 }

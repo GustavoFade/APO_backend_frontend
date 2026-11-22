@@ -1,0 +1,1 @@
+export const TAMANHO_CAMPO_MINIMO = 0;

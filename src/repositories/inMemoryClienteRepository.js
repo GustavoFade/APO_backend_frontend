@@ -1,10 +1,14 @@
 const ClienteRepository = require('./clienteRepository');
+const {
+  INDICE_NAO_ENCONTRADO,
+  ID_INICIAL,
+} = require('../constants/repository');
 
 class InMemoryClienteRepository extends ClienteRepository {
   constructor() {
     super();
     this.clientes = [];
-    this.proximoId = 1;
+    this.proximoId = ID_INICIAL;
   }
 
   listar() {
@@ -25,7 +29,7 @@ class InMemoryClienteRepository extends ClienteRepository {
     const indice = this.clientes.findIndex(
       (cliente) => cliente.id === Number(id),
     );
-    if (indice === -1) {
+    if (indice === INDICE_NAO_ENCONTRADO) {
       return null;
     }
     this.clientes[indice] = { ...this.clientes[indice], ...dados, id: Number(id) };
@@ -36,7 +40,7 @@ class InMemoryClienteRepository extends ClienteRepository {
     const indice = this.clientes.findIndex(
       (cliente) => cliente.id === Number(id),
     );
-    if (indice === -1) {
+    if (indice === INDICE_NAO_ENCONTRADO) {
       return false;
     }
     this.clientes.splice(indice, 1);

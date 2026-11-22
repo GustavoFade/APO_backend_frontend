@@ -1,3 +1,5 @@
+const HttpStatus = require('../constants/httpStatus');
+
 class ClienteController {
   constructor(clienteService) {
     this.clienteService = clienteService;
@@ -6,7 +8,7 @@ class ClienteController {
   listar = (req, res, next) => {
     try {
       const clientes = this.clienteService.listarTodos();
-      res.status(200).json(clientes);
+      res.status(HttpStatus.OK).json(clientes);
     } catch (erro) {
       next(erro);
     }
@@ -15,7 +17,7 @@ class ClienteController {
   buscarPorId = (req, res, next) => {
     try {
       const cliente = this.clienteService.buscarPorId(req.params.id);
-      res.status(200).json(cliente);
+      res.status(HttpStatus.OK).json(cliente);
     } catch (erro) {
       next(erro);
     }
@@ -24,7 +26,7 @@ class ClienteController {
   criar = (req, res, next) => {
     try {
       const cliente = this.clienteService.criar(req.body);
-      res.status(201).json(cliente);
+      res.status(HttpStatus.CREATED).json(cliente);
     } catch (erro) {
       next(erro);
     }
@@ -33,7 +35,7 @@ class ClienteController {
   atualizar = (req, res, next) => {
     try {
       const cliente = this.clienteService.atualizar(req.params.id, req.body);
-      res.status(200).json(cliente);
+      res.status(HttpStatus.OK).json(cliente);
     } catch (erro) {
       next(erro);
     }
@@ -42,7 +44,7 @@ class ClienteController {
   excluir = (req, res, next) => {
     try {
       this.clienteService.excluir(req.params.id);
-      res.status(204).send();
+      res.status(HttpStatus.NO_CONTENT).send();
     } catch (erro) {
       next(erro);
     }

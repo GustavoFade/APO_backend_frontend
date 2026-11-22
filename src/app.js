@@ -1,10 +1,10 @@
 const express = require('express');
 const path = require('path');
-const criarClienteRoutes = require('./routes/clienteRoutes');
+const registerRoutes = require('./routes/registerRoutes');
 const errorHandler = require('./middlewares/errorHandler');
 const notFound = require('./middlewares/notFound');
 
-function criarApp(clienteController) {
+function createApp(container) {
   const app = express();
 
   app.use(express.json());
@@ -12,11 +12,12 @@ function criarApp(clienteController) {
   const publicDir = path.join(__dirname, '..', 'public');
   app.use(express.static(publicDir));
 
-  app.use('/clientes', criarClienteRoutes(clienteController));
+  registerRoutes(app, container);
+
   app.use(notFound);
   app.use(errorHandler);
 
   return app;
 }
 
-module.exports = criarApp;
+module.exports = createApp;
