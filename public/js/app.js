@@ -1,10 +1,17 @@
-import { clienteDataSource } from './mockClienteStore.js';
+import { clienteDataSource } from './api.js';
 import { criarFormulario } from './formulario.js';
 import { criarListagemClientes } from './clientes.js';
 
 const areaMensagens = document.getElementById('mensagens');
 const areaLista = document.getElementById('area-lista');
 const indicadorCarregamento = document.getElementById('lista-carregando');
+
+function mensagemErroComunicacao(erro) {
+  if (erro.name === 'TypeError' || erro.message === 'Failed to fetch') {
+    return 'Falha de comunicação com o servidor. Verifique se a API está em execução.';
+  }
+  return erro.message || 'Ocorreu um erro inesperado.';
+}
 
 function exibirMensagem(texto, tipo = 'info') {
   areaMensagens.textContent = texto;
@@ -22,10 +29,7 @@ async function carregarClientes(listagem) {
     const clientes = await clienteDataSource.listar();
     listagem.renderizar(clientes);
   } catch (erro) {
-    exibirMensagem(
-      erro.message || 'Não foi possível carregar os clientes.',
-      'erro',
-    );
+    exibirMensagem(mensagemErroComunicacao(erro), 'erro');
   } finally {
     indicadorCarregamento.hidden = true;
   }
@@ -54,7 +58,7 @@ const listagem = criarListagemClientes({
       const texto =
         erro.status === 404
           ? 'Cliente não encontrado. A lista será atualizada.'
-          : erro.message || 'Não foi possível excluir o cliente.';
+          : mensagemErroComunicacao(erro);
       exibirMensagem(texto, 'erro');
       await carregarClientes(listagem);
     }
@@ -86,7 +90,9 @@ const formulario = criarFormulario({
       const texto =
         erro.status === 404
           ? 'Cliente não encontrado. A lista será atualizada.'
-          : erro.message || 'Não foi possível salvar o cliente.';
+          : erro.status === 400
+            ? erro.message
+            : mensagemErroComunicacao(erro);
       exibirMensagem(texto, 'erro');
       if (erro.status === 404) {
         formulario.limpar();
