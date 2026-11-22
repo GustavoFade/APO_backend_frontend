@@ -1,5 +1,4 @@
-import { Mensagens } from './constants/mensagens.js';
-import { TAMANHO_CAMPO_MINIMO } from './constants/domain.js';
+import { validarDadosCliente } from './domain/validarCliente.js';
 
 const seletores = {
   form: '#form-cliente',
@@ -28,15 +27,6 @@ export function criarFormulario({ aoEnviar, aoCancelar }) {
     };
   }
 
-  function validarCliente({ nome, email }) {
-    const nomeOk = nome.trim().length > TAMANHO_CAMPO_MINIMO;
-    const emailOk = email.trim().length > TAMANHO_CAMPO_MINIMO;
-    if (!nomeOk || !emailOk) {
-      return Mensagens.CAMPOS_OBRIGATORIOS;
-    }
-    return null;
-  }
-
   function limpar() {
     campoId.value = '';
     form.reset();
@@ -57,7 +47,7 @@ export function criarFormulario({ aoEnviar, aoCancelar }) {
   form.addEventListener('submit', async (evento) => {
     evento.preventDefault();
     const dados = lerDados();
-    const mensagemValidacao = validarCliente(dados);
+    const mensagemValidacao = validarDadosCliente(dados);
     if (mensagemValidacao) {
       aoEnviar({ tipo: 'validacao', mensagem: mensagemValidacao });
       return;

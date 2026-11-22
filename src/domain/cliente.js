@@ -1,5 +1,12 @@
-const { TAMANHO_CAMPO_MINIMO } = require('../constants/domain');
+const {
+  TAMANHO_CAMPO_MINIMO,
+  TAMANHO_EMAIL_MAXIMO,
+  TAMANHO_TELEFONE_MAXIMO,
+  REGEX_EMAIL,
+} = require('../constants/domain');
+const Mensagens = require('../constants/mensagens');
 const CamposObrigatoriosClienteError = require('../errors/domain/CamposObrigatoriosClienteError');
+const ValidacaoClienteError = require('../errors/domain/ValidacaoClienteError');
 
 function normalizarTexto(valor) {
   return String(valor ?? '').trim();
@@ -17,6 +24,29 @@ function validarCamposObrigatorios({ nome, email }) {
   }
 }
 
+function validarFormatoEmail(email) {
+  const valor = normalizarTexto(email);
+  if (valor.length > TAMANHO_EMAIL_MAXIMO) {
+    throw new ValidacaoClienteError(Mensagens.EMAIL_TAMANHO_MAXIMO);
+  }
+  if (!REGEX_EMAIL.test(valor)) {
+    throw new ValidacaoClienteError(Mensagens.EMAIL_INVALIDO);
+  }
+}
+
+function validarTamanhoTelefone(telefone) {
+  const valor = normalizarTexto(telefone);
+  if (valor && valor.length > TAMANHO_TELEFONE_MAXIMO) {
+    throw new ValidacaoClienteError(Mensagens.TELEFONE_TAMANHO_MAXIMO);
+  }
+}
+
+function validarCliente(dados) {
+  validarCamposObrigatorios(dados);
+  validarFormatoEmail(dados.email);
+  validarTamanhoTelefone(dados.telefone);
+}
+
 function montarCliente(dados, id) {
   return {
     id,
@@ -27,6 +57,7 @@ function montarCliente(dados, id) {
 }
 
 module.exports = {
+  validarCliente,
   validarCamposObrigatorios,
   montarCliente,
   normalizarTexto,

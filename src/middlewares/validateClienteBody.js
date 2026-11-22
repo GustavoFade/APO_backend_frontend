@@ -1,20 +1,22 @@
-const { normalizarTexto, campoPreenchido } = require('../domain/cliente');
-const CamposObrigatoriosClienteError = require('../errors/domain/CamposObrigatoriosClienteError');
+const {
+  normalizarTexto,
+  validarCliente,
+} = require('../domain/cliente');
 
 function validateClienteBody(req, res, next) {
-  const nome = normalizarTexto(req.body?.nome);
-  const email = normalizarTexto(req.body?.email);
-
-  if (!campoPreenchido(nome) || !campoPreenchido(email)) {
-    return next(new CamposObrigatoriosClienteError());
-  }
-
-  req.body = {
-    ...req.body,
-    nome,
-    email,
+  const corpo = {
+    nome: normalizarTexto(req.body?.nome),
+    email: normalizarTexto(req.body?.email),
     telefone: normalizarTexto(req.body?.telefone),
   };
+
+  try {
+    validarCliente(corpo);
+  } catch (erro) {
+    return next(erro);
+  }
+
+  req.body = corpo;
   return next();
 }
 

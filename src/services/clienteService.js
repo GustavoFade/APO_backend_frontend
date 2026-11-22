@@ -1,8 +1,5 @@
 const ClienteNaoEncontradoError = require('../errors/domain/ClienteNaoEncontradoError');
-const {
-  montarCliente,
-  validarCamposObrigatorios,
-} = require('../domain/cliente');
+const { montarCliente, validarCliente } = require('../domain/cliente');
 
 class ClienteService {
   constructor(clienteRepository) {
@@ -22,13 +19,13 @@ class ClienteService {
   }
 
   criar(dados) {
-    validarCamposObrigatorios(dados);
+    validarCliente(dados);
     const cliente = montarCliente(dados);
     return this.clienteRepository.salvar(cliente);
   }
 
   atualizar(id, dados) {
-    validarCamposObrigatorios(dados);
+    validarCliente(dados);
     const existente = this.clienteRepository.buscarPorId(id);
     if (!existente) {
       throw new ClienteNaoEncontradoError();

@@ -3,6 +3,7 @@ const Mensagens = require('../constants/mensagens');
 const HttpError = require('../errors/http/HttpError');
 const ClienteNaoEncontradoError = require('../errors/domain/ClienteNaoEncontradoError');
 const CamposObrigatoriosClienteError = require('../errors/domain/CamposObrigatoriosClienteError');
+const ValidacaoClienteError = require('../errors/domain/ValidacaoClienteError');
 
 function resolverRespostaHttp(erro) {
   if (erro instanceof HttpError) {
@@ -16,7 +17,10 @@ function resolverRespostaHttp(erro) {
     };
   }
 
-  if (erro instanceof CamposObrigatoriosClienteError) {
+  if (
+    erro instanceof CamposObrigatoriosClienteError
+    || erro instanceof ValidacaoClienteError
+  ) {
     return {
       statusCode: HttpStatus.BAD_REQUEST,
       mensagem: erro.message,
